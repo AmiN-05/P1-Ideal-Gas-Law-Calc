@@ -32,6 +32,11 @@ namespace P1_Ideal_Gas_Law_Calc
 
                 double molecularWeight = GetMolecularWeightFromNames(gasName, gasNames, molecularWeights, count);
 
+                // GLENN: If the name is not found, GetMolecularWeightFromNames returns -1.
+                //  You'll want to handle that case like this:
+                // if (molecurlarWeight < 0) {
+                //     continue;
+                // }
                 if (molecularWeight == 0)
                 {
                     Console.WriteLine("Error!!");
@@ -51,9 +56,9 @@ namespace P1_Ideal_Gas_Law_Calc
                 Console.WriteLine("Would you like to go again? [Y/N]");
                 string answer = Console.ReadLine().ToUpper();
                 if (answer == "Y")
-                    break;
+                    break; // GLENN: break exits the loop, this is suppose to loop again. I think you want a continue.
                 if (answer == "N")
-                    return;
+                    return; // GLENN: return exits main (which ends your program, so your Goodbye message is skipped). I think you want a break;
             }
             Console.WriteLine("Thank you for using this programm have a nice day!");
         }
@@ -63,11 +68,21 @@ namespace P1_Ideal_Gas_Law_Calc
             Console.WriteLine("Written by ");
         }
        
+        // GLENN: Make sure your function names match the spec!
         private static void ReadMolecularWeights(ref string[] gasNames, ref double[] molecularWeights, out int count)
         {
             int counter = 0;
-            
-            StreamReader file = new StreamReader("MolecularWeightsGasesAndVapors");
+
+            // GLENN: (suggestion) use using with IDisposable types
+            // We haven't talked about this, but to ensure your file always always gets closed, you can use this construct
+            // called using.
+            //
+            // using(StreamReader file = new StreamReader(...)) {
+            //    // read the file etc
+            // }
+            //
+            // When the code exits this block, it will automagically call Dispose() on the file (which also closes the file).
+            StreamReader file = new StreamReader("MolecularWeightsGasesAndVapors.csv");
             string readMoleWeight = file.ReadLine();
             while ((readMoleWeight = file.ReadLine()) != null)
             {                 
@@ -78,16 +93,22 @@ namespace P1_Ideal_Gas_Law_Calc
                   counter++;
             }
              file.Close();
+
+            // GLENN: Debug output got left in.
              System.Console.WriteLine("There were {0} lines.", counter);
-             System.Console.ReadLine();
+             System.Console.ReadLine(); // GLENN: shouldn't be here, not in spec
              count = counter;
         }
         private static void DisplayGasNames(string[] gasNames, int countGases)
         {
             for (int i = 0; i < countGases;)
             {
-                System.Console.WriteLine("{0,-20}{1,-20}{2,-20}", gasNames[i], gasNames[i + 2]);
-                i += 3;
+                // GLENN: Be careful, this works because gasNames is bigger than countGases, but in general
+                // if you're comparing multiple elements, you probably want to use a condition like this:
+                // i + 2 < countGases
+                // GLENN: Also, this line is missing the second format element
+                System.Console.WriteLine("{0,-20}{1,-20}{2,-20}", gasNames[i], gasNames[i + 1], gasNames[i + 2]);
+                i += 3; // GLENN: you can put this in your for (as the last part)
             }
         }
         private static double GetMolecularWeightFromNames(string gasName, string[] gasNames, double[] molecularWeight, int countGases)
@@ -98,6 +119,7 @@ namespace P1_Ideal_Gas_Law_Calc
             {
                 if (gasNames[i] == gasName)
                 {
+                    // GLENN: Looks like you left some debug output in
                     Console.WriteLine("    " + gasName + ": " + molecularWeight[i] + " Da");
                     return molecularWeight[i];
                 }
@@ -125,7 +147,7 @@ namespace P1_Ideal_Gas_Law_Calc
 
             Moles = mass / molecularWeight;
 
-            return 1.0;
+            return Moles; // GLENN: this should be return Moles
         }
         static double CelsiusToKelvin(double celsius)
         {
